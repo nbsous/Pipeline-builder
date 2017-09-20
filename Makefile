@@ -7,6 +7,7 @@ WORKFLOWPATH=workflow
 RESOURCESPATH=resources
 READMEPATH=README.md
 LOGPATH=logs
+LOGDBNAME=logs.sqlite3
 
 # Software variables
 WDLVERSION=0.14
@@ -21,7 +22,7 @@ GATKVERSION=3.8-0
 #EXACVERSION
 
 # Other components
-.PHONY: all slim structure tools scripts pack resources
+.PHONY: all slim structure tools scripts buildlogs pack resources
 
 
 ## Build directory structure for project
@@ -82,6 +83,13 @@ scripts: structure
 	# place R scripts in resources directory
 	cp R-scripts/* $(PIPELINEPATH)/$(RESOURCESPATH)
   # rm -rf R-scripts/*
+  
+  
+## Build SQLite log database  
+buildlogs: structure
+	Rscript $(PIPELINEPATH)/$(RESOURCESPATH)/initSQLiteDB.R $(PIPELINEPATH)/$(LOGPATH)/$(LOGDBNAME)
+
+  
 
 
 ## Pack entire pipeline down into a single .tar.gz ready for export
@@ -90,10 +98,10 @@ pack: structure tools scripts
 	
 
 ## MAKE slim version without all resources included
-slim: structure tools scripts pack 
+slim: structure tools scripts buildlogs pack 
 
 
 ## MAKE ALL
-all: structure tools scripts pack resources
+all: structure tools scripts buildlogs pack resources
 	
 
