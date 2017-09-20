@@ -21,7 +21,7 @@ GATKVERSION=3.8-0
 #EXACVERSION
 
 # Other components
-.PHONY: all structure tools scripts
+.PHONY: all slim structure tools scripts pack resources
 
 
 ## Build directory structure for project
@@ -66,7 +66,7 @@ tools: structure
   
   
 
-## Gather reference VCFs, liftover chains, etc
+## Gather reference VCFs, liftover chains, etc and create large zip file of necessary reference data.
 #resources: structure
 	#https://www.ncbi.nlm.nih.gov/variation/docs/human_variation_vcf/
 
@@ -84,8 +84,16 @@ scripts: structure
   # rm -rf R-scripts/*
 
 
+## Pack entire pipeline down into a single .tar.gz ready for export
+pack: structure tools scripts
+	tar cvfz $(PIPELINEPATH).tar.gz $(PIPELINEPATH)/
+	
+
+## MAKE slim version without all resources included
+slim: structure tools scripts pack 
 
 
 ## MAKE ALL
-all: structure tools scripts
-	#resources
+all: structure tools scripts pack resources
+	
+
