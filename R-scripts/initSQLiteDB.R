@@ -15,3 +15,8 @@ logging_table <- data.frame(BamFilename=character(0),
 
 # create logging table in DB
 DBI::dbWriteTable(logging_db, "InputFiles", logging_table)
+
+# FIXME  does this work as expected? maybe fix in makefile?
+#DBI::dbSendStatement(logging_db, 'PRAGMA journal_mode = "WAL";')
+
+DBI::dbDisconnect(logging_db)

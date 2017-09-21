@@ -26,19 +26,19 @@ GATKVERSION=3.8-0
 
 
 ## Build directory structure for project
-structure: 
+structure:
 # Dir containing workflows
 	mkdir -p $(PIPELINEPATH)/$(WORKFLOWPATH)
-# Dir containing resources  
+# Dir containing resources
 	mkdir -p $(PIPELINEPATH)/$(RESOURCESPATH)
-# Dir containing log files and SQLite DB to keep overview of processing  
+# Dir containing log files and SQLite DB to keep overview of processing
 	mkdir -p $(PIPELINEPATH)/$(LOGPATH)
 # Dir containing binaries & java tools
 	mkdir -p $(PIPELINEPATH)/$(BINPATH)
 	touch $(PIPELINEPATH)/$(READMEPATH)
 	echo '# $(PIPELINEPATH) README' > $(PIPELINEPATH)/$(READMEPATH)
-  
-  
+
+
 ## Gather tools required to run pipeline
 tools: structure
 	# WDL tool
@@ -64,16 +64,16 @@ tools: structure
 	# symlinks for java tools
 	#ln -s  $(PIPELINEPATH)/$(BINPATH)/GenomeAnalysisTK-$(GATKVERSION)/GenomeAnalysisTK.jar $(PIPELINEPATH)/$(BINPATH)/GenomeAnalysisTK.jar
   #BEDTOOLS
-  
-  
+
+
 
 ## Gather reference VCFs, liftover chains, etc and create large zip file of necessary reference data.
 #resources: structure
 	#https://www.ncbi.nlm.nih.gov/variation/docs/human_variation_vcf/
 
 
-	
-## Workflows 
+
+## Workflows
 scripts: structure
 	# Get WDL scripts
 	git clone https://github.com/nbsous/WDL-pipelines
@@ -83,25 +83,23 @@ scripts: structure
 	# place R scripts in resources directory
 	cp R-scripts/* $(PIPELINEPATH)/$(RESOURCESPATH)
   # rm -rf R-scripts/*
-  
-  
-## Build SQLite log database  
+
+
+## Build SQLite log database
 buildlogs: structure
 	Rscript $(PIPELINEPATH)/$(RESOURCESPATH)/initSQLiteDB.R $(PIPELINEPATH)/$(LOGPATH)/$(LOGDBNAME)
-
-  
+	# change pragma to WAL here to prevent issues with concurrent writes to db?
+	# sqlite3 $(PIPELINEPATH)/$(LOGPATH)/$(LOGDBNAME) 'PRAGMA journal_mode = "WAL";'
 
 
 ## Pack entire pipeline down into a single .tar.gz ready for export
 pack: structure tools scripts
 	tar cvfz $(PIPELINEPATH).tar.gz $(PIPELINEPATH)/
-	
+
 
 ## MAKE slim version without all resources included
-slim: structure tools scripts buildlogs pack 
+slim: structure tools scripts buildlogs pack
 
 
 ## MAKE ALL
 all: structure tools scripts buildlogs pack resources
-	
-
